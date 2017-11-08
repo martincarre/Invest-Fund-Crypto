@@ -1,3 +1,4 @@
 *.DS_store*
 *.old
 playground.*
+package-lock.json
