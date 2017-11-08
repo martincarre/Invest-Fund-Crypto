@@ -1,86 +1,72 @@
-// NOTE: DB Name:
-const dbName = 'tickerInfo';
-
 // NOTE: Server Init.:
-const mongo = require('mongodb');
-const mongoose = require('mongoose');
+const mongo = require("mongodb");
+const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
 
-var server = mongoose.connect(`mongodb://localhost/${dbName}`, {
+var server = mongoose.connect(`mongodb://localhost/tickerInfo`, {
   useMongoClient: true
 });
 
 var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log('CONNECTED!');
-});
+db.on("error", console.error.bind(console, "connection error:"));
+db.once("open", function() {});
 
-// NOTE: Importing the mongoose models:
-const { Krakentick } = require('./models/tickermodel');
-const { Bitfitick } = require('./models/tickermodel');
-const { Bitsotick } = require('./models/tickermodel');
-const { Bistamptick } = require('./models/tickermodel');
-const { Bitmextick } = require('./models/tickermodel');
-const { Dsxtick } = require('./models/tickermodel');
-const { Allcointick } = require('./models/tickermodel');
-const { Anxprotick } = require('./models/tickermodel');
-const { Binancetick } = require('./models/tickermodel');
-const { Bitbaytick } = require('./models/tickermodel');
+// NOTE: CCXT Import:
+var ccxt = require("ccxt");
 
-// NOTE: Getting the markets initiated from ccxt:
-var ccxt = require('ccxt');
-let kraken = new ccxt.kraken();
-let bitfinex = new ccxt.bitfinex2();
-let bitstamp = new ccxt.bitstamp();
-let bitmex = new ccxt.bitmex();
-let dsx = new ccxt.dsx();
-let allcoin = new ccxt.allcoin();
-let anxpro = new ccxt.anxpro();
-let bitbay = new ccxt.bitbay();
+const mkArr = [
+  "bittrex",
+  "kraken",
+  "bitfinex2",
+  "dsx",
+  "acx",
+  "bithumb",
+  "bitlish",
+  "bleutrade",
+  "btcturk",
+  "bxinth",
+  "ccex",
+  "cex",
+  "coingi",
+  "coinmarketcap",
+  "cryptopia",
+  "exmo",
+  "gatecoin",
+  "gateio",
+  "hitbtc2",
+  "liqui",
+  "luno",
+  "livecoin",
+  "poloniex",
+  "qryptos",
+  "quoine",
+  "southxchange",
+  "therock",
+  "tidex",
+  "wex"
+];
 
-async function getTicker() {
-  // NOTE: Creating variables to be saved:
-  var ktick = new Krakentick(await kraken.fetchTicker('BTC/USD'));
-  var bfitick = new Bitfitick(await bitfinex.fetchTicker('BTC/USD'));
-  var bstick = new Bistamptick(await bitstamp.fetchTicker('BTC/USD'));
-  var bitmextick = new Bitmextick(await bitmex.fetchTicker('BTC/USD'));
-  var dsxtick = new Dsxtick(await dsx.fetchTicker('BTC/USD'));
-  var allctick = new Allcointick(await allcoin.fetchTicker('BTC/USD'));
-  var anxtick = new Anxprotick(await anxpro.fetchTicker('BTC/USD'));
-  var bitbtick = new Bitbaytick(await bitbay.fetchTicker('BTC/USD'));
+setInterval(async function() {
+  for (var i = 0; i < mkArr.length; i++) {
+    // NOTE: Initializing the market for ccxt import:
+    let mkt = mkArr[i];
+    let exchange = new ccxt[mkt]();
 
-  // NOTE: Saving variables:
-  ktick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('KTICK Saved!');
-  });
-  bfitick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('BFITICK Saved!');
-  });
-  bstick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('BSTICK Saved!');
-  });
-  bitmextick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('BITMEXTICK Saved!');
-  });
-  dsxtick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('DSXTICK Saved!');
-  });
-  allctick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('ALLCTICK Saved!');
-  });
-  anxtick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('ANXTICK Saved!');
-  });
-  bitbtick.save((err, tick) => {
-    if (err) console.log(err);
-    console.log('BITBITCK Saved!');
-  });
-}
+    // NOTE: Preparing model name for DB integration:
+    let mkmodel = mkt.charAt(0).toUpperCase() + mkt.slice(1);
+    let nmodel = mkmodel + "tick";
+    let model = require("./models/tickermodel")[nmodel];
+
+    // NOTE: Getting the info via ccxt and saving into the DB:
+    let allTicks = await exchange.fetchTickers();
+    Object.keys(allTicks).forEach(k => {
+      let info = allTicks[k];
+      info.mkt = mkt;
+      let tick = new model(info);
+      tick.save((err, tick) => {
+        if (err) console.log(err);
+      });
+    });
+    console.log(`${mkt}: Tickers added to the DB.`);
+  }
+}, 1500);
