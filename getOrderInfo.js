@@ -37,6 +37,7 @@ setInterval(async () => {
     let mkmodel = mkt.charAt(0).toUpperCase() + mkt.slice(1);
     let nmodel = mkmodel + "order";
     let model = require("./models/ordermodel")[nmodel];
+
     let delay = 2000;
     let markets = await exchange.fetchMarkets();
     markets.map(async res => {
