@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "ccxt": "^1.9.361",
+    "lodash": "^4.17.4",
     "mongodb": "^2.2.33",
     "mongoose": "^4.13.0"
   }

@@ -1,30 +1,37 @@
 const mongoose = require("mongoose");
 mongoose.Promise = global.Promise;
+var ccxt = require("ccxt");
 
 // NOTE: General model for the ticker info:
 var tickerSchema = mongoose.Schema({
-  mkt: String,
-  symbol: String,
-  timestamp: Number,
-  datetime: Date,
-  high: Number,
-  low: Number,
-  bid: Number,
-  ask: Number,
-  vwap: Number,
-  open: Number,
-  close: Number,
-  first: Number,
-  last: Number,
-  change: Number,
-  percentage: Number,
-  average: Number,
-  baseVolume: Number,
-  quoteVolume: Number,
-  info: Object
+  // mkt: String,
+  // symbol: String,
+  // timestamp: Number,
+  // datetime: Date,
+  // high: Number,
+  // low: Number,
+  // bid: Number,
+  // ask: Number,
+  // vwap: Number,
+  // open: Number,
+  // close: Number,
+  // first: Number,
+  // last: Number,
+  // change: Number,
+  // percentage: Number,
+  // average: Number,
+  // baseVolume: Number,
+  // quoteVolume: Number,
+  // info: Object
 });
 
 // NOTE: Adding each model
+// const mkArr = ccxt.exchanges;
+// for (var i = 0; i < mkArr.length; i++) {
+//   let mkmodel = mkArr[i].charAt(0).toUpperCase() + mkArr[i].slice(1);
+//   let nmodel = mkmodel + "tick";
+//
+// }
 var Krakentick = mongoose.model("Krakentick", tickerSchema);
 var Bitfinex2tick = mongoose.model("Bitfinex2tick", tickerSchema);
 var Dsxtick = mongoose.model("Dsxtick", tickerSchema);

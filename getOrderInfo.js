@@ -28,6 +28,8 @@ const mkArr = [
   "wex"
 ];
 
+const delay = 10000;
+
 setInterval(async () => {
   for (var i = 0; i < mkArr.length; i++) {
     let mkt = mkArr[i];
@@ -38,7 +40,6 @@ setInterval(async () => {
     let nmodel = mkmodel + "order";
     let model = require("./models/ordermodel")[nmodel];
 
-    let delay = 2000;
     let markets = await exchange.fetchMarkets();
     markets.map(async res => {
       if (
@@ -54,8 +55,8 @@ setInterval(async () => {
         book.save((err, book) => {
           if (err) console.log(err);
         });
-        await new Promise(resolve => setTimeout(resolve, delay)); // rate limit
       }
+      await new Promise(resolve => setTimeout(resolve, delay)); // rate limit
     });
     console.log(`${mkt}: Orders added`);
   }
