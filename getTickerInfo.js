@@ -3,14 +3,15 @@ var ccxt = require("ccxt");
 var MongoClient = require("mongodb").MongoClient,
   assert = require("assert");
 
-var url = "mongodb://localhost:27017/test";
+// NOTE: Server initiation:
+var url = "mongodb://localhost:27017/tickerInfo";
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
-  insertDocuments(db, function() {});
+  insertTickers(db, function() {});
 });
 
-var insertDocuments = function(db, callback) {
+var insertTickers = function(db, callback) {
   ccxt.exchanges.forEach(r => {
     let exchange = new ccxt[r]();
     let mkt = r;
