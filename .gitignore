@@ -1,6 +1,6 @@
 *.DS_store*
 *.old
-playground.*
+playground*
 package-lock.json
 node_modules/
 previous/

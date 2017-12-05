@@ -12,25 +12,28 @@ MongoClient.connect(url, function(err, db) {
 });
 
 var insertTickers = function(db, callback) {
-  ccxt.exchanges.forEach(r => {
-    let exchange = new ccxt[r]();
-    let mkt = r;
-    if (exchange.hasFetchTickers)
-      var ticks = exchange
-        .fetchTickers()
-        .then(res => {
-          if (_.isObject(res))
-            Object.keys(res).forEach(ticker => {
-              let tick = res[ticker];
-              tick.market = mkt;
-              let mkmodel = mkt.charAt(0).toUpperCase() + mkt.slice(1) + "tick";
-              var collection = db.collection(mkmodel);
-              collection.insert(tick, function(err, result) {
-                callback(result);
+  setInterval(function() {
+    ccxt.exchanges.forEach(r => {
+      let exchange = new ccxt[r]();
+      let mkt = r;
+      if (exchange.hasFetchTickers)
+        var ticks = exchange
+          .fetchTickers()
+          .then(res => {
+            if (_.isObject(res))
+              Object.keys(res).forEach(ticker => {
+                let tick = res[ticker];
+                tick.market = mkt;
+                let mkmodel =
+                  mkt.charAt(0).toUpperCase() + mkt.slice(1) + "tick";
+                var collection = db.collection(mkmodel);
+                collection.insert(tick, function(err, result) {
+                  callback(result);
+                });
               });
-            });
-        })
-        .catch(e => {});
-    console.log(`${mkt} added to the DB`);
-  });
+          })
+          .catch(e => {});
+      console.log(`${mkt} added to the DB`);
+    });
+  }, 10000);
 };
