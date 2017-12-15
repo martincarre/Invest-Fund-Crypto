@@ -1,58 +1,72 @@
 var _ = require("lodash");
 var ccxt = require("ccxt");
-var MongoClient = require("mongodb").MongoClient,
-  assert = require("assert");
 
-let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR"];
-let delay = 1200;
-
-// NOTE: Server initiation:
-
-setInterval(function() {
-  ccxt.exchanges.forEach(r => {
-    let exchange = new ccxt[r]();
-    if (exchange.hasFetchOrderBook) {
-      pairs.forEach(p => {
-        exchange
+function getOrder(p) {
+  return Promise.all(
+    ccxt.exchanges.map(api => {
+      let exchange = new ccxt[api]();
+      exchange.timeout = 3000;
+      if (exchange.hasFetchOrderBook) {
+        return exchange
           .fetchOrderBook(p)
-          .then(async order => {
-            if (_.isObject(order) && order.bids[0][1]) {
+          .then(order => {
+            if (_.isObject(order) && order.bids[0][1] && order.asks[0][1]) {
               let now = Math.floor(new Date());
-              order.mkt = r;
+              order.mkt = exchange.name;
               order.pair = p;
-              let mkmodel = r.charAt(0).toUpperCase() + r.slice(1) + "order";
-              var url = `mongodb://localhost:27017/${"order" + p.slice(0, 3)}`;
-              MongoClient.connect(url, function(err, db) {
-                assert.equal(null, err);
-                var collection = db.collection(mkmodel);
-                collection.insert(order, function(err, result) {});
-                db.close();
-              });
-              let compOrder = {
-                mkt: order.mkt,
-                pair: order.pair,
-                aprice: order.asks[0][0],
-                avol: order.asks[0][1],
-                bprice: order.bids[0][0],
-                bvol: order.bids[0][1],
-                sn: order.timestamp,
-                ping: now - order.timestamp,
-                fees: exchange.fees
-              };
-              var irl = `mongodb://localhost:27017/${"comp" + p.slice(0, 3)}`;
-              MongoClient.connect(irl, function(err, db) {
-                assert.equal(null, err);
-                var collection = db.collection(mkmodel);
-                collection.insert(compOrder, function(err, result) {});
-                db.close();
-              });
-              console.log(compOrder);
-              await new Promise(resolve => setTimeout(resolve, delay));
+              order.ping = now - order.timestamp;
+              return order;
             } else {
+              return 1;
             }
           })
-          .catch(e => {});
-      });
+          .catch(e => {
+            return 1;
+          });
+      } else {
+        return 1;
+      }
+    })
+  );
+}
+
+function transformOrder(base, comp) {
+  let orderComp = {
+    mkBase: base.mkt,
+    mkComp: comp.mkt,
+    pairBase: base.pair,
+    pairComp: comp.pair,
+    oriPriceInfo: {
+      pBidBase: base.bids[0][0],
+      pBidComp: comp.bids[0][0],
+      vBidBase: base.bids[0][1],
+      vBidComp: comp.bids[0][1],
+      pAskBase: base.asks[0][0],
+      pAskComp: comp.asks[0][0],
+      vAskBase: base.asks[0][1],
+      vAskComp: comp.asks[0][1]
+    },
+    processedPriceInfo: {
+      basePriceSpread: base.asks[0][0] - comp.bids[0][0],
+      compPriceSpread: comp.asks[0][0] - comp.bids[0][0],
+      baseVolSpread: base.asks[0][1] - comp.bids[0][1],
+      compVilSpread: comp.asks[0][1] - base.bids[0][1]
+    },
+    oriTimeInfo: {
+      pingBase: base.ping,
+      pingComp: comp.ping,
+      snBase: base.timestamp,
+      snComp: comp.timestamp
+    },
+    processedTimeInfo: {
+      pingSpread: base.ping - comp.ping,
+      snSpread: base.timestamp - comp.timestamp
     }
-  });
-}, 2000);
+  };
+  return orderComp;
+}
+
+module.exports = {
+  getOrder,
+  transformOrder
+};
