@@ -1,30 +1,23 @@
 var _ = require("lodash");
-var fs = require("fs");
 var ccxt = require("ccxt");
 const { getOrder } = require("./getOrderinfo.js");
 const { transformOrder } = require("./getOrderinfo.js");
 
 let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR"];
 
-Promise.all(pairs.map(getOrder))
-  .then(res => {
-    res.forEach(g => {
-      for (var i = 0; i < g.length; i++) {
-        if (g[i] !== 1) {
-          for (var j = i + 1; j < g.length; j++) {
-            if (g[j] !== 1) {
-              let base = g[i];
-              let comp = g[j];
-              let orderComp = transformOrder(base, comp);
-              if (orderComp.processedPriceInfo.basePriceSpread > 0) {
-                console.log(orderComp);
-              }
-            }
+Promise.all(pairs.map(getOrder)).then(pairArr => {
+  pairArr.forEach(orderArr => {
+    for (var i = 0; i < orderArr.length; i++) {
+      let base = orderArr[i];
+      if (base !== 1 && base !== 2 && base !== 3) {
+        for (var j = i + 1; j < orderArr.length; j++) {
+          let comp = orderArr[j];
+          if (comp !== 1 && comp !== 2 && comp !== 3) {
+            let orderComp = transformOrder(base, comp);
+            console.log(orderComp);
           }
         }
       }
-    });
-  })
-  .catch(e => {
-    console.log(e);
+    }
   });
+});

@@ -4,3 +4,4 @@ playground*
 package-lock.json
 node_modules/
 previous/
+keys.js

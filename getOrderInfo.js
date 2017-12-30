@@ -1,28 +1,33 @@
 var _ = require("lodash");
 var ccxt = require("ccxt");
 
+let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR"];
+let exchanges = ["kraken", "bitfinex", "exmo", "bitstamp", "bitbay"];
+
 function getOrder(p) {
   return Promise.all(
-    ccxt.exchanges.map(api => {
-      let exchange = new ccxt[api]();
-      exchange.timeout = 3000;
-      if (exchange.hasFetchOrderBook) {
-        return exchange
-          .fetchOrderBook(p)
-          .then(order => {
-            if (_.isObject(order) && order.bids[0][1] && order.asks[0][1]) {
-              let now = Math.floor(new Date());
-              order.mkt = exchange.name;
-              order.pair = p;
-              order.ping = now - order.timestamp;
-              return order;
-            } else {
-              return 1;
-            }
-          })
-          .catch(e => {
-            return 1;
-          });
+    ccxt.exchanges.map(async e => {
+      if (exchanges.includes(e)) {
+        let exchange = new ccxt[e]({ timeout: 1500 });
+        if (exchange.hasFetchOrderBook) {
+          let now = Math.floor(new Date());
+          let order = await exchange
+            .fetchOrderBook(p)
+            .then(o => {
+              return o;
+            })
+            .catch(err => {});
+          if (order) {
+            order.mkt = e;
+            order.pair = p;
+            order.ping = order.timestamp - now;
+            return order;
+          } else {
+            return 3;
+          }
+        } else {
+          return 2;
+        }
       } else {
         return 1;
       }
