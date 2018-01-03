@@ -2,12 +2,18 @@ var _ = require("lodash");
 var ccxt = require("ccxt");
 var { keys } = require("./keys");
 
-let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR"];
+// NOTE: Setting up the currencies and market variables.
+// These variables can be extended to more trading pairs and / or markets;
+// If the markets are extended, you need to add the correct API keys in the keys file.
+
+let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR", "XRP/EUR"];
 let exchanges = ["kraken", "bitfinex", "exmo", "bitbay"];
 
+// NOTE: Getting back order info
 function getOrder(p) {
   return Promise.all(
     ccxt.exchanges.map(async e => {
+      // NOTE: Checking if the markets are included in the supported list:
       if (exchanges.includes(e)) {
         let exchange = new ccxt[e]({
           timeout: 1500,
@@ -17,23 +23,38 @@ function getOrder(p) {
         });
         if (exchange.hasFetchOrderBook) {
           let now = Math.floor(new Date());
+          // NOTE: Getting OrderBook info
           let order = await exchange
             .fetchOrderBook(p)
             .then(o => {
               return o;
             })
             .catch(err => {});
+          // NOTE: Checking if order exists and is correctly returned (object)
           if (order && _.isObject(order)) {
+            // NOTE: Checking the available balances for the corresponding market
             let balance = await exchange
               .fetchBalance()
               .then(b => {
                 return b;
               })
               .catch(err => {});
+            // NOTE: Now getting the fees info for each market, if available (support seems to be poor)
+            let market = await exchange
+              .load_markets()
+              .then(m => {
+                if (m[p].info.fees) {
+                  return m[p].info.fees;
+                } else {
+                  return "No fee info";
+                }
+              })
+              .catch(err => {});
             order.mkt = e;
             order.pair = p;
             order.ping = order.timestamp - now;
             order.mktvar = {};
+            // NOTE: Checking if the balance info was correctly returned and adding the info to the orderbook
             if (_.isObject(balance)) {
               order.mktvar.balance = {
                 free: balance.free,
@@ -42,25 +63,41 @@ function getOrder(p) {
               };
             } else {
               order.mktvar.balance = {
-                free: "NA",
-                used: "NA",
-                total: "NA"
+                free: null,
+                used: null,
+                total: null
               };
             }
+            // NOTE: Same as for the balance but for the fees
+            if (_.isObject(market)) {
+              order.mktvar.fees = {
+                fees: market
+              };
+            } else {
+              order.mktvar.fees = null;
+            }
+            // NOTE: OK! Everything went well returning the order object in full.
             return order;
           } else {
+            // NOTE: Goes with the check-up if order doesn't exists or isn't an Object.
+            // Basically means there was either a timeout or the server is unreachable.
             return 3;
           }
         } else {
+          // NOTE: The exchange doesn't support fetchOrderBook() function
           return 2;
         }
       } else {
+        // NOTE: Market is not supported by the app. No need to get anyfurther
         return 1;
       }
     })
   );
 }
 
+// NOTE: Rearranging the order Objects to fit to our needs
+// Ori means raw information from the orderBook request
+// Processed means the ori reworked to fit our needs
 function transformOrder(base, comp) {
   let orderComp = {
     mkBase: base.mkt,
@@ -86,6 +123,10 @@ function transformOrder(base, comp) {
     oriBalanceInfo: {
       baseBalance: base.mktvar.balance,
       compBalance: comp.mktvar.balance
+    },
+    oriFeesInfo: {
+      baseFees: base.mktvar.fees,
+      compFees: comp.mktvar.fees
     },
     oriTimeInfo: {
       pingBase: base.ping,
