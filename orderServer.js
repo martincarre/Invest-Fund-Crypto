@@ -17,9 +17,6 @@ function insertOrderComp(db, baseMkt, compMkt, pair, order, callback) {
   let colModel = "comp" + pair.slice(0, 3);
   let collection = db.collection(colModel);
   collection.insert(order, function(err, result) {
-    console.log(
-      `SUCCESS: added comparison between ${baseMkt} & ${compMkt} for ${pair}`
-    );
     callback(result);
   });
 }
@@ -28,11 +25,11 @@ function insertOrderComp(db, baseMkt, compMkt, pair, order, callback) {
 function insertOrder(db, base, comp, callback) {
   let collection = db.collection(base.pair);
   collection.insert(base, function(err, result) {
-    console.log(`SUCCESS: ${base.mkt} Order Book Added to the DB`);
+    callback(result);
   });
   collection = db.collection(comp.pair);
   collection.insert(comp, function(err, result) {
-    console.log(`SUCCESS: ${comp.mkt} Order Book Added to the DB`);
+    callback(result);
   });
 }
 

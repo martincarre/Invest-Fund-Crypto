@@ -3,8 +3,9 @@ var ccxt = require("ccxt");
 const { getOrder } = require("./getOrderinfo");
 const { transformOrder } = require("./getOrderinfo");
 const { orderServer } = require("./orderServer");
+const { investBot } = require("./investBot");
 
-let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR"];
+let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR", "XRP/EUR"];
 
 Promise.all(pairs.map(getOrder)).then(pairArr => {
   pairArr.forEach(orderArr => {
@@ -15,11 +16,12 @@ Promise.all(pairs.map(getOrder)).then(pairArr => {
           let comp = orderArr[j];
           if (comp !== 1 && comp !== 2 && comp !== 3) {
             let orderComp = transformOrder(base, comp);
+            investBot(orderComp);
             orderServer(base, comp, orderComp);
-            console.log(orderComp);
           }
         }
       }
     }
   });
+  console.log("All orderbook and comparison info saved to DB");
 });

@@ -6,8 +6,7 @@ var { keys } = require("./keys");
 // These variables can be extended to more trading pairs and / or markets;
 // If the markets are extended, you need to add the correct API keys in the keys file.
 
-let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "BCH/EUR", "XRP/EUR"];
-let exchanges = ["kraken", "bitfinex", "exmo", "bitbay"];
+let exchanges = ["kraken", "bitfinex", "exmo", "bitbay", "dsx"];
 
 // NOTE: Getting back order info
 function getOrder(p) {
@@ -98,6 +97,8 @@ function getOrder(p) {
 // NOTE: Rearranging the order Objects to fit to our needs
 // Ori means raw information from the orderBook request
 // Processed means the ori reworked to fit our needs
+// Some other info is added afterwards to the object in the invest function.
+
 function transformOrder(base, comp) {
   let orderComp = {
     mkBase: base.mkt,
@@ -115,11 +116,12 @@ function transformOrder(base, comp) {
       vAskComp: comp.asks[0][1]
     },
     processedPriceInfo: {
-      basePriceSpread: base.asks[0][0] - comp.bids[0][0],
-      compPriceSpread: comp.asks[0][0] - comp.bids[0][0],
+      basePriceSpread: comp.bids[0][0] - base.asks[0][0],
+      compPriceSpread: base.bids[0][0] - comp.asks[0][0],
       baseVolSpread: base.asks[0][1] - comp.bids[0][1],
       compVolSpread: comp.asks[0][1] - base.bids[0][1]
     },
+    investInfo: {},
     oriBalanceInfo: {
       baseBalance: base.mktvar.balance,
       compBalance: comp.mktvar.balance
