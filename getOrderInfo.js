@@ -1,12 +1,8 @@
 var _ = require("lodash");
 var ccxt = require("ccxt");
 var { keys } = require("./keys");
-
-// NOTE: Setting up the currencies and market variables.
-// These variables can be extended to more trading pairs and / or markets;
-// If the markets are extended, you need to add the correct API keys in the keys file.
-
-let exchanges = ["kraken", "bitfinex", "exmo", "bitbay", "dsx"];
+var { fees } = require("./fees");
+const { exchanges } = require("./config");
 
 // NOTE: Getting back order info
 function getOrder(p) {
@@ -38,17 +34,6 @@ function getOrder(p) {
                 return b;
               })
               .catch(err => {});
-            // NOTE: Now getting the fees info for each market, if available (support seems to be poor)
-            let market = await exchange
-              .load_markets()
-              .then(m => {
-                if (m[p].info.fees) {
-                  return m[p].info.fees;
-                } else {
-                  return "No fee info";
-                }
-              })
-              .catch(err => {});
             order.mkt = e;
             order.pair = p;
             order.ping = order.timestamp - now;
@@ -62,19 +47,20 @@ function getOrder(p) {
               };
             } else {
               order.mktvar.balance = {
-                free: null,
-                used: null,
-                total: null
+                free: {
+                  EUR: 0,
+                  BTC: 0,
+                  LTC: 0,
+                  ETH: 0,
+                  XRP: 0,
+                  BCH: 0,
+                  USD: 0
+                },
+                used: 0,
+                total: 0
               };
             }
-            // NOTE: Same as for the balance but for the fees
-            if (_.isObject(market)) {
-              order.mktvar.fees = {
-                fees: market
-              };
-            } else {
-              order.mktvar.fees = null;
-            }
+
             // NOTE: OK! Everything went well returning the order object in full.
             return order;
           } else {
@@ -128,7 +114,9 @@ function transformOrder(base, comp) {
     },
     oriFeesInfo: {
       baseFees: base.mktvar.fees,
-      compFees: comp.mktvar.fees
+      compFees: comp.mktvar.fees,
+      baseFeesHard: fees[base.mkt],
+      compFeesHard: fees[comp.mkt]
     },
     oriTimeInfo: {
       pingBase: base.ping,

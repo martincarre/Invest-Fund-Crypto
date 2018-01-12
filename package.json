@@ -9,9 +9,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ccxt": "^1.10.533",
+    "ccxt": "^1.10.600",
     "lodash": "^4.17.4",
-    "mongodb": "^2.2.33",
-    "mongoose": "^4.13.0"
+    "mongodb": "^2.2.34",
+    "mongoose": "^4.13.9"
   }
 }
