@@ -20,7 +20,7 @@ let exchanges = [
 ];
 
 // authExchangesForInvest will check for investment opportunities.
-let authExchangesForInvest = ["exmo", "bitbay", "dsx"];
+let authExchangesForInvest = ["exmo", "bitbay", "dsx", "kraken"];
 
 module.exports = {
   pairs,

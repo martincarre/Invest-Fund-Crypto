@@ -20,11 +20,7 @@ function verifBaseInfo(orderComp) {
         pBuy: orderComp.oriPriceInfo.pAskBase,
         pSell: orderComp.oriPriceInfo.pBidComp,
         vBuy: orderComp.oriPriceInfo.vAskBase,
-        vSell: orderComp.oriPriceInfo.vBidComp,
-        volumeSelector: null,
-        totalBuy: null,
-        totalSell: null,
-        totalProfit: null
+        vSell: orderComp.oriPriceInfo.vBidComp
       };
       if (orderComp.investInfo.vSell < orderComp.investInfo.vBuy) {
         orderComp.investInfo.volumeSelector = "Sell";
