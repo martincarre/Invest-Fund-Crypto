@@ -1,6 +1,5 @@
 *.DS_store*
 *.old
-playground*
 package-lock.json
 node_modules/
 previous/

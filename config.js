@@ -14,16 +14,22 @@ let exchanges = [
   "exmo",
   "bitbay",
   "dsx",
-  "kuna",
   "livecoin",
-  "bitfinex"
+  "bitfinex",
+  "kuna"
 ];
 
 // authExchangesForInvest will check for investment opportunities.
 let authExchangesForInvest = ["exmo", "bitbay", "dsx", "kraken"];
 
+// Investment Consideration variables:
+var maxTimeOut = 2000;
+var minPriceSpread = 1;
+
 module.exports = {
   pairs,
   exchanges,
-  authExchangesForInvest
+  authExchangesForInvest,
+  maxTimeOut,
+  minPriceSpread
 };

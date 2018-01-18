@@ -1,9 +1,10 @@
-var maxTimeOut = 2000;
-var minPriceSpread = 1;
 const _ = require("lodash");
 const { processOrder } = require("./orders");
+const { maxTimeOut } = require("./config");
+const { minPriceSpread } = require("./config");
 
 function verifBaseInfo(orderComp) {
+  // NOTE: **************** CHECKING BASIC INVESMENT RULES DEFINED IN THE CONFIG FILE
   if (
     orderComp.oriTimeInfo.pingBase < maxTimeOut &&
     orderComp.oriTimeInfo.pingComp < maxTimeOut &&
@@ -12,6 +13,7 @@ function verifBaseInfo(orderComp) {
     (orderComp.processedPriceInfo.basePriceSpread > minPriceSpread ||
       orderComp.processedPriceInfo.compPriceSpread > minPriceSpread)
   ) {
+    // NOTE: ************************ CHECKING WHEN BASE IS THE BASE INVESTMENT
     if (orderComp.processedPriceInfo.basePriceSpread > minPriceSpread) {
       orderComp.investInfo = {
         invest: true,
@@ -82,7 +84,7 @@ function verifBaseInfo(orderComp) {
       }
       return true;
 
-      // NOTE: *****
+      // NOTE: ************************ CHECKING WHEN COMP IS THE BASE INVESTMENT
     } else if (orderComp.processedPriceInfo.compPriceSpread > minPriceSpread) {
       orderComp.investInfo = {
         invest: true,
@@ -153,13 +155,18 @@ function verifBaseInfo(orderComp) {
               (1 - orderComp.oriFeesInfo.baseFeesHard)
         };
       } else {
-        console.log("Something went wrong!");
+        // NOTE: Something went wrong here. This shouldn't happen ===> Error handling to be dev.
+        console.log("Something went wrong![Basic Investment Rules]");
       }
       return true;
     } else {
+      // NOTE: Something went wrong here. This shouldn't happen ===> Error handling to be dev.
+      orderComp.investInfo.invest = false;
       return null;
     }
   } else {
+    // NOTE: in case the basic investment rules were not respected
+    orderComp.investInfo.invest = false;
     return null;
   }
 }
@@ -225,6 +232,7 @@ function balanceCheck(orderComp) {
         missing: "both"
       };
     } else {
+      // NOTE: Something went wrong here. This shouldn't happen ===> Error handling to be dev.
       console.log("Something went wrong[Checking availability]");
     }
   }

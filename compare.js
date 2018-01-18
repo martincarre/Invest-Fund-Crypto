@@ -6,10 +6,12 @@ const { orderServer } = require("./orderServer");
 const { investBot } = require("./investBot");
 const { pairs } = require("./config");
 const { authExchangesForInvest } = require("./config");
+const { doubleCheck } = require("./investBot");
 
 Promise.all(pairs.map(getOrder))
   .then(pairArr => {
-    pairArr.forEach(orderArr => {
+    pairArr.forEach(async orderArr => {
+      let digestArr = [];
       for (var i = 0; i < orderArr.length; i++) {
         let base = orderArr[i];
         if (base !== 1 && base !== 2 && base !== 3) {
@@ -20,13 +22,23 @@ Promise.all(pairs.map(getOrder))
               if (
                 authExchangesForInvest.includes(orderComp.mkBase) &&
                 authExchangesForInvest.includes(orderComp.mkComp)
-              )
-                investBot(orderComp);
-              orderServer(base, comp, orderComp);
+              ) {
+                var finalOrder = await investBot(orderComp);
+                if (
+                  finalOrder.investInfo.invest === true &&
+                  finalOrder.investInfo.orderToPass.availability === true
+                ) {
+                  digestArr.push(finalOrder);
+                  orderServer(base, comp, finalOrder);
+                } else {
+                  orderServer(base, comp, finalOrder);
+                }
+              }
             }
           }
         }
       }
+      let doubleFreeArr = await doubleCheck(digestArr);
     });
     console.log("All orderbook and comparison info saved to DB");
   })
