@@ -1,5 +1,5 @@
 *.DS_store*
-*.old
+*.old 
 package-lock.json
 node_modules/
 previous/
