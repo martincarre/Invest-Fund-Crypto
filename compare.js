@@ -24,10 +24,7 @@ Promise.all(pairs.map(getOrder))
                 authExchangesForInvest.includes(orderComp.mkComp)
               ) {
                 var finalOrder = await investBot(orderComp);
-                if (
-                  finalOrder.investInfo.invest === true &&
-                  finalOrder.investInfo.orderToPass.availability === true
-                ) {
+                if (finalOrder.investInfo.invest === true) {
                   digestArr.push(finalOrder);
                   orderServer(base, comp, finalOrder);
                 } else {
@@ -39,6 +36,7 @@ Promise.all(pairs.map(getOrder))
         }
       }
       let doubleFreeArr = await doubleCheck(digestArr);
+      console.log(JSON.stringify(doubleFreeArr, null, 3));
     });
     console.log("All orderbook and comparison info saved to DB");
   })

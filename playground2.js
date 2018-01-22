@@ -58,28 +58,9 @@ var arr = [
     option: 8
   }
 ];
+const count = arr.reduce((tally, fruit) => {
+  tally = (tally || 0) + 1;
+  return tally;
+}, {});
 
-const res = _.reduce(
-  arr,
-  (result, item) => {
-    const same = _.find(result, r =>
-      _.some([r.mkBase === item.mkBase, r.mkComp === item.mkComp])
-    ); // find same already added item
-
-    if (same !== undefined) {
-      if (same.invest.profit >= item.invest.profit) {
-        return result; // do nothing if profit is less than already added
-      }
-
-      return _.chain(result) // remove item with smaller profit and push item with higher profit
-        .reject({ mkBase: same.mkBase, mkComp: same.mkComp })
-        .concat(item)
-        .value();
-    }
-
-    return _.concat(result, item); // just push item
-  },
-  []
-);
-
-// console.log(res);
+console.log(count);

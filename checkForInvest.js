@@ -1,5 +1,4 @@
 const _ = require("lodash");
-const { processOrder } = require("./orders");
 const { maxTimeOut } = require("./config");
 const { minPriceSpread } = require("./config");
 
@@ -94,10 +93,7 @@ function verifBaseInfo(orderComp) {
         pSell: orderComp.oriPriceInfo.pBidBase,
         vBuy: orderComp.oriPriceInfo.vAskComp,
         vSell: orderComp.oriPriceInfo.vBidBase,
-        volumeSelector: null,
-        totalBuy: null,
-        totalSell: null,
-        totalProfit: null
+        volumeSelector: null
       };
       if (orderComp.investInfo.vSell < orderComp.investInfo.vBuy) {
         orderComp.investInfo.volumeSelector = "Sell";
@@ -118,14 +114,14 @@ function verifBaseInfo(orderComp) {
           totalSell:
             orderComp.investInfo.vSell *
             orderComp.oriPriceInfo.pBidBase *
-            (1 - orderComp.oriFeesInfo.baseFeesHard),
+            (1 + orderComp.oriFeesInfo.baseFeesHard),
           totalProfit:
             orderComp.investInfo.vSell *
               orderComp.oriPriceInfo.pBidBase *
               (1 - orderComp.oriFeesInfo.compFeesHard) -
             orderComp.investInfo.vSell *
               orderComp.oriPriceInfo.pAskComp *
-              (1 - orderComp.oriFeesInfo.baseFeesHard)
+              (1 + orderComp.oriFeesInfo.baseFeesHard)
         };
       } else if (orderComp.investInfo.vSell > orderComp.investInfo.vBuy) {
         orderComp.investInfo.volumeSelector = "Buy";
@@ -145,14 +141,14 @@ function verifBaseInfo(orderComp) {
           totalSell:
             orderComp.investInfo.vBuy *
             orderComp.oriPriceInfo.pBidBase *
-            (1 - orderComp.oriFeesInfo.baseFeesHard),
+            (1 + orderComp.oriFeesInfo.baseFeesHard),
           totalProfit:
             orderComp.investInfo.vBuy *
               orderComp.oriPriceInfo.pBidBase *
               (1 - orderComp.oriFeesInfo.compFeesHard) -
             orderComp.investInfo.vBuy *
               orderComp.oriPriceInfo.pAskComp *
-              (1 - orderComp.oriFeesInfo.baseFeesHard)
+              (1 + orderComp.oriFeesInfo.baseFeesHard)
         };
       } else {
         // NOTE: Something went wrong here. This shouldn't happen ===> Error handling to be dev.

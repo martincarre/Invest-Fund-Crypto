@@ -1,5 +1,6 @@
 const { verifBaseInfo } = require("./checkForInvest");
 const { balanceCheck } = require("./checkForInvest");
+const _ = require("lodash");
 
 // NOTE: CHECK TO AGGREGATE INFO BASED ON BASIC INFO RULES + BALANCE
 async function investBot(orderComp) {
@@ -13,24 +14,31 @@ async function investBot(orderComp) {
 // therefore checking for the best possible scenario ==> max. net.totalProfit
 
 function doubleCheck(digestArr) {
-  if (digestArr.length > 1) {
-    for (var i = 0; i < digestArr.length; i++) {
-      let a = digestArr[i];
-      for (var j = i + 1; j < digestArr.length; j++) {
-        let b = digestArr[j];
-        if (a.mkBase === b.mkBase || a.mkComp === b.mkComp) {
-          if (a.investInfo.net.totalProfit > b.investInfo.net.totalProfit) {
-            digestArr.splice(j, 1);
-          } else {
-            digestArr.splice(i, 1);
-          }
+  const res = _.reduce(
+    digestArr,
+    (result, item) => {
+      const same = _.find(result, r =>
+        _.some([r.mkBase === item.mkBase, r.mkComp === item.mkComp])
+      ); // find same already added item
+
+      if (same !== undefined) {
+        if (
+          same.investInfo.net.totalProfit >= item.investInfo.net.totalProfit
+        ) {
+          return result; // do nothing if profit is less than already added
         }
+
+        return _.chain(result) // remove item with smaller profit and push item with higher profit
+          .reject({ mkBase: same.mkBase, mkComp: same.mkComp })
+          .concat(item)
+          .value();
       }
-    }
-    return digestArr;
-  } else if (digestArr.length === 1) {
-    return digestArr;
-  }
+
+      return _.concat(result, item); // just push item
+    },
+    []
+  );
+  return res;
 }
 
 module.exports = {
