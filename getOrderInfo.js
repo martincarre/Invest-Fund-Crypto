@@ -4,6 +4,9 @@ var { keys } = require("./keys");
 var { fees } = require("./fees");
 const { exchanges } = require("./config");
 
+// NOTE: OVERRIDING THE NONCE:
+let nonce = 1;
+
 // NOTE: Getting back order info
 function getOrder(p) {
   return Promise.all(
@@ -14,7 +17,10 @@ function getOrder(p) {
           timeout: 1500,
           apiKey: keys[e].api,
           secret: keys[e].secret,
-          enableRateLimit: true
+          enableRateLimit: true,
+          nonce() {
+            return this.milliseconds();
+          }
         });
         if (exchange.hasFetchOrderBook) {
           let now = Math.floor(new Date());
@@ -86,50 +92,57 @@ function getOrder(p) {
 // Some other info is added afterwards to the object in the invest function.
 
 function transformOrder(base, comp) {
-  let orderComp = {
-    mkBase: base.mkt,
-    mkComp: comp.mkt,
-    pairBase: base.pair,
-    pairComp: comp.pair,
-    oriPriceInfo: {
-      pBidBase: base.bids[0][0],
-      pBidComp: comp.bids[0][0],
-      vBidBase: base.bids[0][1],
-      vBidComp: comp.bids[0][1],
-      pAskBase: base.asks[0][0],
-      pAskComp: comp.asks[0][0],
-      vAskBase: base.asks[0][1],
-      vAskComp: comp.asks[0][1]
-    },
-    processedPriceInfo: {
-      basePriceSpread: comp.bids[0][0] - base.asks[0][0],
-      compPriceSpread: base.bids[0][0] - comp.asks[0][0],
-      baseVolSpread: base.asks[0][1] - comp.bids[0][1],
-      compVolSpread: comp.asks[0][1] - base.bids[0][1]
-    },
-    investInfo: {},
-    oriBalanceInfo: {
-      baseBalance: base.mktvar.balance,
-      compBalance: comp.mktvar.balance
-    },
-    oriFeesInfo: {
-      baseFees: base.mktvar.fees,
-      compFees: comp.mktvar.fees,
-      baseFeesHard: fees[base.mkt],
-      compFeesHard: fees[comp.mkt]
-    },
-    oriTimeInfo: {
-      pingBase: base.ping,
-      pingComp: comp.ping,
-      snBase: base.timestamp,
-      snComp: comp.timestamp
-    },
-    processedTimeInfo: {
-      pingSpread: base.ping - comp.ping,
-      snSpread: base.timestamp - comp.timestamp
-    }
-  };
-  return orderComp;
+  if (
+    base.bids[0][0] &&
+    comp.bids[0][0] &&
+    base.asks[0][0] &&
+    comp.asks[0][0]
+  ) {
+    let orderComp = {
+      mkBase: base.mkt,
+      mkComp: comp.mkt,
+      pairBase: base.pair,
+      pairComp: comp.pair,
+      oriPriceInfo: {
+        pBidBase: base.bids[0][0],
+        pBidComp: comp.bids[0][0],
+        vBidBase: base.bids[0][1],
+        vBidComp: comp.bids[0][1],
+        pAskBase: base.asks[0][0],
+        pAskComp: comp.asks[0][0],
+        vAskBase: base.asks[0][1],
+        vAskComp: comp.asks[0][1]
+      },
+      processedPriceInfo: {
+        basePriceSpread: comp.bids[0][0] - base.asks[0][0],
+        compPriceSpread: base.bids[0][0] - comp.asks[0][0],
+        baseVolSpread: base.asks[0][1] - comp.bids[0][1],
+        compVolSpread: comp.asks[0][1] - base.bids[0][1]
+      },
+      investInfo: {},
+      oriBalanceInfo: {
+        baseBalance: base.mktvar.balance,
+        compBalance: comp.mktvar.balance
+      },
+      oriFeesInfo: {
+        baseFees: base.mktvar.fees,
+        compFees: comp.mktvar.fees,
+        baseFeesHard: fees[base.mkt],
+        compFeesHard: fees[comp.mkt]
+      },
+      oriTimeInfo: {
+        pingBase: base.ping,
+        pingComp: comp.ping,
+        snBase: base.timestamp,
+        snComp: comp.timestamp
+      },
+      processedTimeInfo: {
+        pingSpread: base.ping - comp.ping,
+        snSpread: base.timestamp - comp.timestamp
+      }
+    };
+    return orderComp;
+  }
 }
 
 module.exports = {

@@ -17,7 +17,9 @@ function verifBaseInfo(orderComp) {
       orderComp.investInfo = {
         invest: true,
         baseForInvest: "base",
+        buyMk: orderComp.mkBase,
         counterPart: "comp",
+        sellMk: orderComp.mkComp,
         pBuy: orderComp.oriPriceInfo.pAskBase,
         pSell: orderComp.oriPriceInfo.pBidComp,
         vBuy: orderComp.oriPriceInfo.vAskBase,
@@ -25,6 +27,7 @@ function verifBaseInfo(orderComp) {
       };
       if (orderComp.investInfo.vSell < orderComp.investInfo.vBuy) {
         orderComp.investInfo.volumeSelector = "Sell";
+        orderComp.investInfo.finalVol = orderComp.investInfo.vSell;
         orderComp.investInfo.gross = {
           totalBuy:
             orderComp.investInfo.vSell * orderComp.oriPriceInfo.pAskBase,
@@ -42,17 +45,18 @@ function verifBaseInfo(orderComp) {
           totalSell:
             orderComp.investInfo.vSell *
             orderComp.oriPriceInfo.pBidComp *
-            (1 - orderComp.oriFeesInfo.compFeesHard),
+            (1 + orderComp.oriFeesInfo.compFeesHard),
           totalProfit:
             orderComp.investInfo.vSell *
               orderComp.oriPriceInfo.pBidComp *
               (1 - orderComp.oriFeesInfo.baseFeesHard) -
             orderComp.investInfo.vSell *
               orderComp.oriPriceInfo.pAskBase *
-              (1 - orderComp.oriFeesInfo.compFeesHard)
+              (1 + orderComp.oriFeesInfo.compFeesHard)
         };
       } else if (orderComp.investInfo.vSell > orderComp.investInfo.vBuy) {
         orderComp.investInfo.volumeSelector = "Buy";
+        orderComp.investInfo.finalVol = orderComp.investInfo.vBuy;
         orderComp.investInfo.gross = {
           totalBuy: orderComp.investInfo.vBuy * orderComp.oriPriceInfo.pAskBase,
           totalSell:
@@ -69,14 +73,14 @@ function verifBaseInfo(orderComp) {
           totalSell:
             orderComp.investInfo.vBuy *
             orderComp.oriPriceInfo.pBidComp *
-            (1 - orderComp.oriFeesInfo.compFeesHard),
+            (1 + orderComp.oriFeesInfo.compFeesHard),
           totalProfit:
             orderComp.investInfo.vBuy *
               orderComp.oriPriceInfo.pBidComp *
               (1 - orderComp.oriFeesInfo.compFeesHard) -
             orderComp.investInfo.vBuy *
               orderComp.oriPriceInfo.pAskBase *
-              (1 - orderComp.oriFeesInfo.baseFeesHard)
+              (1 + orderComp.oriFeesInfo.baseFeesHard)
         };
       } else {
         console.log("Something went wrong!");
@@ -88,7 +92,9 @@ function verifBaseInfo(orderComp) {
       orderComp.investInfo = {
         invest: true,
         baseForInvest: "comp",
+        mkBuy: orderComp.mkComp,
         counterPart: "base",
+        mkSell: orderComp.mkBase,
         pBuy: orderComp.oriPriceInfo.pAskComp,
         pSell: orderComp.oriPriceInfo.pBidBase,
         vBuy: orderComp.oriPriceInfo.vAskComp,
@@ -188,6 +194,7 @@ function balanceCheck(orderComp) {
         .free
     )
   ) {
+    console.log("[ERROR]: Balance Check Error");
   } else {
     let vToSell =
       orderComp.investInfo["v" + orderComp.investInfo.volumeSelector];
@@ -198,29 +205,40 @@ function balanceCheck(orderComp) {
     let availableToSell =
       orderComp.oriBalanceInfo[orderComp.investInfo.counterPart + "Balance"]
         .free[orderComp.pairComp.slice(0, 3)];
-    if (availableToBuy !== 0 && availableToSell !== 0) {
+    if (
+      availableToBuy >= vToBuy * orderComp.investInfo.pBuy &&
+      availableToSell >= vToSell
+    ) {
       orderComp.investInfo.orderToPass = {
         availability: true,
         availableToBuy: availableToBuy,
         availableToSell: availableToSell,
         missing: false
       };
-      processOrder(orderComp);
-    } else if (availableToBuy === 0 && availableToSell !== 0) {
+    } else if (
+      availableToBuy < vToBuy * orderComp.investInfo.pBuy &&
+      availableToSell >= vToSell
+    ) {
       orderComp.investInfo.orderToPass = {
         availability: false,
         availableToBuy: availableToBuy,
         availableToSell: availableToSell,
         missing: "availableToBuy"
       };
-    } else if (availableToSell === 0 && availableToBuy !== 0) {
+    } else if (
+      availableToSell < vToSell &&
+      availableToBuy >= vToBuy * orderComp.investInfo.pBuy
+    ) {
       orderComp.investInfo.orderToPass = {
         availability: false,
         availableToBuy: availableToBuy,
         availableToSell: availableToSell,
         missing: "availableToSell"
       };
-    } else if (availableToSell === 0 && availableToBuy === 0) {
+    } else if (
+      availableToSell < vToSell &&
+      availableToBuy < vToBuy * orderComp.investInfo.pBuy
+    ) {
       orderComp.investInfo.orderToPass = {
         availability: false,
         availableToBuy: availableToBuy,

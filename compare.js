@@ -7,6 +7,7 @@ const { investBot } = require("./investBot");
 const { pairs } = require("./config");
 const { authExchangesForInvest } = require("./config");
 const { doubleCheck } = require("./investBot");
+const { orderPass } = require("./investBot");
 
 Promise.all(pairs.map(getOrder))
   .then(pairArr => {
@@ -25,6 +26,7 @@ Promise.all(pairs.map(getOrder))
               ) {
                 var finalOrder = await investBot(orderComp);
                 if (finalOrder.investInfo.invest === true) {
+                  // NOTE: ADD HERE CHEK IF AVAILABLE CASH <================ /!\ /!\
                   digestArr.push(finalOrder);
                   orderServer(base, comp, finalOrder);
                 } else {
@@ -36,7 +38,7 @@ Promise.all(pairs.map(getOrder))
         }
       }
       let doubleFreeArr = await doubleCheck(digestArr);
-      console.log(JSON.stringify(doubleFreeArr, null, 3));
+      orderPass(doubleFreeArr);
     });
     console.log("All orderbook and comparison info saved to DB");
   })

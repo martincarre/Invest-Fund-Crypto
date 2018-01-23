@@ -1,6 +1,11 @@
 const { verifBaseInfo } = require("./checkForInvest");
 const { balanceCheck } = require("./checkForInvest");
 const _ = require("lodash");
+const ccxt = require("ccxt");
+const { keys } = require("./keys");
+
+// NOTE: OVERRIDING THE NONCE:
+let nonce = 1;
 
 // NOTE: CHECK TO AGGREGATE INFO BASED ON BASIC INFO RULES + BALANCE
 async function investBot(orderComp) {
@@ -41,7 +46,60 @@ function doubleCheck(digestArr) {
   return res;
 }
 
+// PASSING ORDERS OT THE MARKET:
+
+function orderPass(orderArr) {
+  if (!_.isEmpty(orderArr))
+    orderArr.forEach(o => {
+      if (o.investInfo.buyMk && o.investInfo.sellMk) {
+        let buyMk = new ccxt[o.investInfo.buyMk]({
+          timeout: 1500,
+          apiKey: keys[o.investInfo.buyMk].api,
+          secret: keys[o.investInfo.buyMk].secret,
+          enableRateLimit: true,
+          nonce() {
+            return this.milliseconds();
+          }
+        });
+        let sellMk = new ccxt[o.investInfo.sellMk]({
+          timeout: 1500,
+          apiKey: keys[o.investInfo.sellMk].api,
+          secret: keys[o.investInfo.sellMk].secret,
+          enableRateLimit: true,
+          nonce() {
+            return this.milliseconds();
+          }
+        });
+        buyMk
+          .createLimitBuyOrder(
+            o.pairBase,
+            o.investInfo.finalVol,
+            o.investInfo.pBuy
+          )
+          .then(r => {
+            console.log(r);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+        sellMk
+          .createLimitSellOrder(
+            o.pairBase,
+            o.investInfo.finalVol,
+            o.investInfo.pSell
+          )
+          .then(r => {
+            console.log(r);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
+    });
+}
+
 module.exports = {
   investBot,
-  doubleCheck
+  doubleCheck,
+  orderPass
 };
