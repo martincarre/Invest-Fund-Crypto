@@ -23,8 +23,9 @@ let exchanges = [
 let authExchangesForInvest = ["exmo", "bitbay", "dsx", "kraken"];
 
 // Investment Consideration variables:
-var maxTimeOut = 2000;
+var maxTimeOut = 1700;
 var minPriceSpread = 1;
+var minProfit = 1; // NOTE: <======== ADD % SUPPORT /!\/!\
 
 module.exports = {
   pairs,
