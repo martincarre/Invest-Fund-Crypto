@@ -38,7 +38,10 @@ Promise.all(pairs.map(getOrder))
         }
       }
       let doubleFreeArr = await doubleCheck(digestArr);
-      orderPass(doubleFreeArr);
+      doubleFreeArr.forEach(o => {
+        console.log(JSON.stringify(o, null, 3));
+      });
+      // orderPass(doubleFreeArr);
     });
     console.log("All orderbook and comparison info saved to DB");
   })

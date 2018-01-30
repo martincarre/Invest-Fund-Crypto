@@ -205,51 +205,114 @@ function balanceCheck(orderComp) {
     let availableToSell =
       orderComp.oriBalanceInfo[orderComp.investInfo.counterPart + "Balance"]
         .free[orderComp.pairComp.slice(0, 3)];
-    if (
-      availableToBuy >= vToBuy * orderComp.investInfo.pBuy &&
-      availableToSell >= vToSell
-    ) {
-      orderComp.investInfo.orderToPass = {
-        availability: true,
-        availableToBuy: availableToBuy,
-        availableToSell: availableToSell,
-        missing: false
-      };
-    } else if (
-      availableToBuy < vToBuy * orderComp.investInfo.pBuy &&
-      availableToSell >= vToSell
-    ) {
-      orderComp.investInfo.orderToPass = {
-        availability: false,
-        availableToBuy: availableToBuy,
-        availableToSell: availableToSell,
-        missing: "availableToBuy"
-      };
-    } else if (
-      availableToSell < vToSell &&
-      availableToBuy >= vToBuy * orderComp.investInfo.pBuy
-    ) {
-      orderComp.investInfo.orderToPass = {
-        availability: false,
-        availableToBuy: availableToBuy,
-        availableToSell: availableToSell,
-        missing: "availableToSell"
-      };
-    } else if (
-      availableToSell < vToSell &&
-      availableToBuy < vToBuy * orderComp.investInfo.pBuy
-    ) {
-      orderComp.investInfo.orderToPass = {
-        availability: false,
-        availableToBuy: availableToBuy,
-        availableToSell: availableToSell,
-        missing: "both"
-      };
+    if (availableToBuy === 0 && availableToSell === 0) {
+      orderToPass(
+        orderComp,
+        false,
+        availableToBuy,
+        vToBuy,
+        availableToSell,
+        vToSell,
+        false,
+        "both"
+      );
+    } else if (availableToBuy === 0 && availableToSell > 0) {
+      orderToPass(
+        orderComp,
+        false,
+        availableToBuy,
+        vToBuy,
+        availableToSell,
+        vToSell,
+        false,
+        "buyMk"
+      );
+    } else if (availableToBuy > 0 && availableToSell === 0) {
+      orderToPass(
+        orderComp,
+        false,
+        availableToBuy,
+        vToBuy,
+        availableToSell,
+        vToSell,
+        false,
+        "sellMk"
+      );
+    } else if (availableToBuy > 0 && availableToSell > 0) {
+      if (availableToBuy < vToBuy && availableToSell < vToSell) {
+        orderToPass(
+          orderComp,
+          true,
+          availableToBuy,
+          vToBuy,
+          availableToSell,
+          vToSell,
+          true,
+          "both"
+        );
+      } else if (availableToBuy < vToBuy && availableToSell >= vToSell) {
+        orderToPass(
+          orderComp,
+          true,
+          availableToBuy,
+          vToBuy,
+          availableToSell,
+          vToSell,
+          true,
+          "buyMk"
+        );
+      } else if (availableToBuy >= vToBuy && availableToSell < vToSell) {
+        orderToPass(
+          orderComp,
+          true,
+          availableToBuy,
+          vToBuy,
+          availableToSell,
+          vToSell,
+          true,
+          "sellMk"
+        );
+      } else if (availableToBuy >= vToBuy && availableToSell >= vToSell) {
+        orderToPass(
+          orderComp,
+          true,
+          availableToBuy,
+          vToBuy,
+          availableToSell,
+          vToSell,
+          false,
+          "none"
+        );
+      } else {
+        console.log("something went wrong balance check 2nd level");
+      }
     } else {
-      // NOTE: Something went wrong here. This shouldn't happen ===> Error handling to be dev.
-      console.log("Something went wrong[Checking availability]");
+      console.log("something went wrong balance check 1st level");
     }
   }
+}
+
+function orderToPass(
+  orderComp,
+  avail,
+  availableToBuy,
+  vToBuy,
+  availableToSell,
+  vToSell,
+  limit,
+  missing
+) {
+  orderComp.investInfo.orderToPass = {
+    availability: avail,
+    availableToBuy: availableToBuy,
+    vToBuy: vToBuy,
+    mToBuy: vToBuy - availableToBuy,
+    availableToSell: availableToSell,
+    vToSell: vToSell,
+    mToSell: vToSell - availableToSell,
+    limit: limit,
+    missing: missing
+  };
 }
 
 module.exports = {

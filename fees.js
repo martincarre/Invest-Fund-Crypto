@@ -5,7 +5,8 @@ let fees = {
   bitbay: 0.0043,
   dsx: 0.0035,
   kuna: 0.0025,
-  livecoin: 0.0018
+  livecoin: 0.0018,
+  bitstamp: 0.0025
 };
 
 module.exports = {

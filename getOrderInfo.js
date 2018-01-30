@@ -13,15 +13,7 @@ function getOrder(p) {
     ccxt.exchanges.map(async e => {
       // NOTE: Checking if the markets are included in the supported list:
       if (exchanges.includes(e)) {
-        let exchange = new ccxt[e]({
-          timeout: 1500,
-          apiKey: keys[e].api,
-          secret: keys[e].secret,
-          enableRateLimit: true,
-          nonce() {
-            return this.milliseconds();
-          }
-        });
+        let exchange = new ccxt[e](keys[e]);
         if (exchange.hasFetchOrderBook) {
           let now = Math.floor(new Date());
           // NOTE: Getting OrderBook info
@@ -142,6 +134,8 @@ function transformOrder(base, comp) {
       }
     };
     return orderComp;
+  } else {
+    console.log("ERROR: TransformOrder, something went wrong");
   }
 }
 

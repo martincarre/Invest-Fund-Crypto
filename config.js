@@ -16,11 +16,12 @@ let exchanges = [
   "dsx",
   "livecoin",
   "bitfinex",
-  "kuna"
+  "kuna",
+  "bitstamp"
 ];
 
 // authExchangesForInvest will check for investment opportunities.
-let authExchangesForInvest = ["exmo", "bitbay", "dsx", "kraken"];
+let authExchangesForInvest = ["bitbay", "dsx", "kraken", "bitstamp"];
 
 // Investment Consideration variables:
 var maxTimeOut = 1700;
