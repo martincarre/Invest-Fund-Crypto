@@ -30,6 +30,11 @@ Promise.all(pairs.map(getOrder))
                   digestArr.push(finalOrder);
                   orderServer(base, comp, finalOrder);
                 } else {
+                  console.log(
+                    `${finalOrder.mkBase} / ${finalOrder.mkComp} - ${
+                      finalOrder.pairBase
+                    }: No arbitrage opportunity was found`
+                  );
                   orderServer(base, comp, finalOrder);
                 }
               }

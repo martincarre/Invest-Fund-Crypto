@@ -3,12 +3,13 @@ var MongoClient = require("mongodb").MongoClient,
 
 // NOTE: Server initiation:
 function orderServer(base, comp, order) {
-  var url = "mongodb://localhost:27017/orderInfo";
-  MongoClient.connect(url, function(err, db) {
+  var url = "mongodb://localhost:27017/";
+  MongoClient.connect(url, function(err, client) {
     assert.equal(null, err);
+    var db = client.db("orderInfo");
     insertOrder(db, base, comp, function() {});
     insertOrderComp(db, base.mkt, comp.mkt, base.pair, order, function() {});
-    db.close();
+    client.close();
   });
 }
 

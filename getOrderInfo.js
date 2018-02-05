@@ -86,9 +86,13 @@ function getOrder(p) {
 function transformOrder(base, comp) {
   if (
     base.bids[0][0] &&
+    base.bids[0] &&
     comp.bids[0][0] &&
+    base.bids[0] &&
     base.asks[0][0] &&
-    comp.asks[0][0]
+    base.asks[0] &&
+    comp.asks[0][0] &&
+    comp.asks[0]
   ) {
     let orderComp = {
       mkBase: base.mkt,

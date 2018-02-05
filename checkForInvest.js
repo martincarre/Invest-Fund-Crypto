@@ -1,6 +1,5 @@
 const _ = require("lodash");
 const { maxTimeOut } = require("./config");
-const { minPriceSpread } = require("./config");
 
 function verifBaseInfo(orderComp) {
   // NOTE: **************** CHECKING BASIC INVESMENT RULES DEFINED IN THE CONFIG FILE
@@ -8,12 +7,10 @@ function verifBaseInfo(orderComp) {
     orderComp.oriTimeInfo.pingBase < maxTimeOut &&
     orderComp.oriTimeInfo.pingComp < maxTimeOut &&
     orderComp.processedTimeInfo.snSpread < maxTimeOut &&
-    orderComp.processedTimeInfo.pingSpread < maxTimeOut &&
-    (orderComp.processedPriceInfo.basePriceSpread > minPriceSpread ||
-      orderComp.processedPriceInfo.compPriceSpread > minPriceSpread)
+    orderComp.processedTimeInfo.pingSpread < maxTimeOut
   ) {
     // NOTE: ************************ CHECKING WHEN BASE IS THE BASE INVESTMENT
-    if (orderComp.processedPriceInfo.basePriceSpread > minPriceSpread) {
+    if (orderComp.processedPriceInfo.basePriceSpread > 0) {
       orderComp.investInfo = {
         invest: true,
         baseForInvest: "base",
@@ -23,7 +20,10 @@ function verifBaseInfo(orderComp) {
         pBuy: orderComp.oriPriceInfo.pAskBase,
         pSell: orderComp.oriPriceInfo.pBidComp,
         vBuy: orderComp.oriPriceInfo.vAskBase,
-        vSell: orderComp.oriPriceInfo.vBidComp
+        vSell: orderComp.oriPriceInfo.vBidComp,
+        fBuy: orderComp.oriFeesInfo.baseFeesHard,
+        fSell: orderComp.oriFeesInfo.compFeesHard,
+        volumeSelector: null
       };
       if (orderComp.investInfo.vSell < orderComp.investInfo.vBuy) {
         orderComp.investInfo.volumeSelector = "Sell";
@@ -41,11 +41,11 @@ function verifBaseInfo(orderComp) {
           totalBuy:
             orderComp.investInfo.vSell *
             orderComp.oriPriceInfo.pAskBase *
-            (1 - orderComp.oriFeesInfo.baseFeesHard),
+            (1 + orderComp.oriFeesInfo.baseFeesHard),
           totalSell:
             orderComp.investInfo.vSell *
             orderComp.oriPriceInfo.pBidComp *
-            (1 + orderComp.oriFeesInfo.compFeesHard),
+            (1 - orderComp.oriFeesInfo.compFeesHard),
           totalProfit:
             orderComp.investInfo.vSell *
               orderComp.oriPriceInfo.pBidComp *
@@ -69,11 +69,11 @@ function verifBaseInfo(orderComp) {
           totalBuy:
             orderComp.investInfo.vBuy *
             orderComp.oriPriceInfo.pAskBase *
-            (1 - orderComp.oriFeesInfo.baseFeesHard),
+            (1 + orderComp.oriFeesInfo.baseFeesHard),
           totalSell:
             orderComp.investInfo.vBuy *
             orderComp.oriPriceInfo.pBidComp *
-            (1 + orderComp.oriFeesInfo.compFeesHard),
+            (1 - orderComp.oriFeesInfo.compFeesHard),
           totalProfit:
             orderComp.investInfo.vBuy *
               orderComp.oriPriceInfo.pBidComp *
@@ -88,7 +88,7 @@ function verifBaseInfo(orderComp) {
       return true;
 
       // NOTE: ************************ CHECKING WHEN COMP IS THE BASE INVESTMENT
-    } else if (orderComp.processedPriceInfo.compPriceSpread > minPriceSpread) {
+    } else if (orderComp.processedPriceInfo.compPriceSpread > 0) {
       orderComp.investInfo = {
         invest: true,
         baseForInvest: "comp",
@@ -99,6 +99,8 @@ function verifBaseInfo(orderComp) {
         pSell: orderComp.oriPriceInfo.pBidBase,
         vBuy: orderComp.oriPriceInfo.vAskComp,
         vSell: orderComp.oriPriceInfo.vBidBase,
+        fBuy: orderComp.oriFeesInfo.baseFeesHard,
+        fSell: orderComp.oriFeesInfo.compFeesHard,
         volumeSelector: null
       };
       if (orderComp.investInfo.vSell < orderComp.investInfo.vBuy) {
@@ -116,11 +118,11 @@ function verifBaseInfo(orderComp) {
           totalBuy:
             orderComp.investInfo.vSell *
             orderComp.oriPriceInfo.pAskComp *
-            (1 - orderComp.oriFeesInfo.compFeesHard),
+            (1 + orderComp.oriFeesInfo.compFeesHard),
           totalSell:
             orderComp.investInfo.vSell *
             orderComp.oriPriceInfo.pBidBase *
-            (1 + orderComp.oriFeesInfo.baseFeesHard),
+            (1 - orderComp.oriFeesInfo.baseFeesHard),
           totalProfit:
             orderComp.investInfo.vSell *
               orderComp.oriPriceInfo.pBidBase *
@@ -143,11 +145,11 @@ function verifBaseInfo(orderComp) {
           totalBuy:
             orderComp.investInfo.vBuy *
             orderComp.oriPriceInfo.pAskComp *
-            (1 - orderComp.oriFeesInfo.compFeesHard),
+            (1 + orderComp.oriFeesInfo.compFeesHard),
           totalSell:
             orderComp.investInfo.vBuy *
             orderComp.oriPriceInfo.pBidBase *
-            (1 + orderComp.oriFeesInfo.baseFeesHard),
+            (1 - orderComp.oriFeesInfo.baseFeesHard),
           totalProfit:
             orderComp.investInfo.vBuy *
               orderComp.oriPriceInfo.pBidBase *
@@ -311,7 +313,24 @@ function orderToPass(
     vToSell: vToSell,
     mToSell: vToSell - availableToSell,
     limit: limit,
-    missing: missing
+    missing: missing,
+    expected: {
+      toBuy: orderComp.investInfo.gross.totalBuy,
+      toSell: orderComp.investInfo.gross.totalSell,
+      exProfit: orderComp.investInfo.net.totalProfit,
+      PoV:
+        orderComp.investInfo.net.totalProfit /
+        orderComp.investInfo.gross.totalBuy
+    },
+    real: {
+      toBuy: availableToBuy,
+      toSell: availableToSell,
+      exProfit:
+        availableToBuy * (1 + orderComp.investInfo.fBuy) -
+        availableToSell *
+          (1 - orderComp.investInfo.fSell) *
+          orderComp.investInfo.pSell
+    }
   };
 }
 

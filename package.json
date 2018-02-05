@@ -9,10 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ccxt": "^1.10.726",
+    "ccxt": "^1.10.922",
     "lodash": "^4.17.4",
-    "mongodb": "^2.2.34",
-    "mongoose": "^4.13.9",
+    "mongodb": "^2.2.33",
+    "mongoose": "^5.0.2",
     "node-fetch": "^1.7.3"
   }
 }

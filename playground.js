@@ -1,14 +1,21 @@
-const _ = require("lodash");
 const ccxt = require("ccxt");
-const e = "bitbay";
-const { keys } = require("./keys");
 
-let exchange = new ccxt[e](keys[e]);
-exchange
+let kraken = new ccxt.kraken({
+  timeout: 2500,
+  apiKey: "8+6pUuV7qONTxIbOqyu6it3Dtg/oLHY3njjGP99p/ZOkMFhIavMW5Qra",
+  secret:
+    "xDxxXZIgyJfADqp1+JMsll9EgP0SJz9d8B6Q3QH6Vsa7buAppmjp308Goo13DMHGRLa0X9VQcb37r+EneKOdcA==",
+  enableRateLimit: true,
+  nonce() {
+    return this.milliseconds();
+  }
+});
+
+kraken
   .fetchBalance()
   .then(b => {
     console.log(b);
   })
-  .catch(e => {
-    console.log(e);
+  .catch(err => {
+    console.log(err);
   });
