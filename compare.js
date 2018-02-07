@@ -8,6 +8,7 @@ const { pairs } = require("./config");
 const { authExchangesForInvest } = require("./config");
 const { doubleCheck } = require("./investBot");
 const { orderPass } = require("./investBot");
+let i = 0;
 
 Promise.all(pairs.map(getOrder))
   .then(pairArr => {
@@ -20,23 +21,40 @@ Promise.all(pairs.map(getOrder))
             let comp = orderArr[j];
             if (comp !== 1 && comp !== 2 && comp !== 3) {
               let orderComp = transformOrder(base, comp);
-              if (
-                authExchangesForInvest.includes(orderComp.mkBase) &&
-                authExchangesForInvest.includes(orderComp.mkComp)
-              ) {
-                var finalOrder = await investBot(orderComp);
-                if (finalOrder.investInfo.invest === true) {
-                  // NOTE: ADD HERE CHEK IF AVAILABLE CASH <================ /!\ /!\
-                  digestArr.push(finalOrder);
-                  orderServer(base, comp, finalOrder);
-                } else {
-                  console.log(
-                    `${finalOrder.mkBase} / ${finalOrder.mkComp} - ${
-                      finalOrder.pairBase
-                    }: No arbitrage opportunity was found`
-                  );
-                  orderServer(base, comp, finalOrder);
+              if (orderComp) {
+                if (
+                  authExchangesForInvest.includes(orderComp.mkBase) &&
+                  authExchangesForInvest.includes(orderComp.mkComp)
+                ) {
+                  var finalOrder = await investBot(orderComp);
+                  if (finalOrder.investInfo.invest === true) {
+                    if (finalOrder.investInfo.orderToPass.real.exProfit > 0) {
+                      digestArr.push(finalOrder);
+                      orderServer(base, comp, finalOrder);
+                    } else {
+                      console.log(
+                        `${finalOrder.mkBase} / ${finalOrder.mkComp} - ${
+                          finalOrder.pairBase
+                        }: No cash available or no profit`,
+                        JSON.stringify(
+                          finalOrder.investInfo.orderToPass.real,
+                          null,
+                          3
+                        )
+                      );
+                      orderServer(base, comp, finalOrder);
+                    }
+                  } else {
+                    console.log(
+                      `${finalOrder.mkBase} / ${finalOrder.mkComp} - ${
+                        finalOrder.pairBase
+                      }: No arbitrage opportunity was found`
+                    );
+                    orderServer(base, comp, finalOrder);
+                  }
                 }
+              } else {
+                console.log("ERROR: No orderComp");
               }
             }
           }
@@ -44,9 +62,17 @@ Promise.all(pairs.map(getOrder))
       }
       let doubleFreeArr = await doubleCheck(digestArr);
       doubleFreeArr.forEach(o => {
-        console.log(JSON.stringify(o, null, 3));
+        console.log(
+          o.pairBase +
+            ": " +
+            o.investInfo.mkBuy +
+            "/" +
+            o.investInfo.mkSell +
+            ": " +
+            JSON.stringify(o.investInfo.orderToPass.real, null, 3)
+        );
       });
-      // orderPass(doubleFreeArr);
+      orderPass(doubleFreeArr);
     });
     console.log("All orderbook and comparison info saved to DB");
   })

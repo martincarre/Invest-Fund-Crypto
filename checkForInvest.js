@@ -207,6 +207,11 @@ function balanceCheck(orderComp) {
     let availableToSell =
       orderComp.oriBalanceInfo[orderComp.investInfo.counterPart + "Balance"]
         .free[orderComp.pairComp.slice(0, 3)];
+    var cryptVolume = balanceCompare(
+      orderComp,
+      availableToBuy,
+      availableToSell
+    );
     if (availableToBuy === 0 && availableToSell === 0) {
       orderToPass(
         orderComp,
@@ -215,6 +220,7 @@ function balanceCheck(orderComp) {
         vToBuy,
         availableToSell,
         vToSell,
+        cryptVolume,
         false,
         "both"
       );
@@ -226,6 +232,7 @@ function balanceCheck(orderComp) {
         vToBuy,
         availableToSell,
         vToSell,
+        cryptVolume,
         false,
         "buyMk"
       );
@@ -237,6 +244,7 @@ function balanceCheck(orderComp) {
         vToBuy,
         availableToSell,
         vToSell,
+        cryptVolume,
         false,
         "sellMk"
       );
@@ -249,6 +257,7 @@ function balanceCheck(orderComp) {
           vToBuy,
           availableToSell,
           vToSell,
+          cryptVolume,
           true,
           "both"
         );
@@ -260,6 +269,7 @@ function balanceCheck(orderComp) {
           vToBuy,
           availableToSell,
           vToSell,
+          cryptVolume,
           true,
           "buyMk"
         );
@@ -271,6 +281,7 @@ function balanceCheck(orderComp) {
           vToBuy,
           availableToSell,
           vToSell,
+          cryptVolume,
           true,
           "sellMk"
         );
@@ -282,6 +293,7 @@ function balanceCheck(orderComp) {
           vToBuy,
           availableToSell,
           vToSell,
+          cryptVolume,
           false,
           "none"
         );
@@ -294,6 +306,15 @@ function balanceCheck(orderComp) {
   }
 }
 
+function balanceCompare(orderComp, buyCash, sellCrypt) {
+  let vAvailBuy = buyCash / orderComp.investInfo.pBuy;
+  if (vAvailBuy < sellCrypt) {
+    return vAvailBuy;
+  } else {
+    return sellCrypt;
+  }
+}
+
 function orderToPass(
   orderComp,
   avail,
@@ -301,6 +322,7 @@ function orderToPass(
   vToBuy,
   availableToSell,
   vToSell,
+  cryptVolume,
   limit,
   missing
 ) {
@@ -314,6 +336,7 @@ function orderToPass(
     mToSell: vToSell - availableToSell,
     limit: limit,
     missing: missing,
+    cryptVolume: cryptVolume,
     expected: {
       toBuy: orderComp.investInfo.gross.totalBuy,
       toSell: orderComp.investInfo.gross.totalSell,
@@ -323,13 +346,15 @@ function orderToPass(
         orderComp.investInfo.gross.totalBuy
     },
     real: {
-      toBuy: availableToBuy,
-      toSell: availableToSell,
+      toBuy: orderComp.investInfo.pBuy * cryptVolume,
+      toSell: orderComp.investInfo.pSell * cryptVolume,
       exProfit:
-        availableToBuy * (1 + orderComp.investInfo.fBuy) -
-        availableToSell *
-          (1 - orderComp.investInfo.fSell) *
-          orderComp.investInfo.pSell
+        orderComp.investInfo.pSell *
+          cryptVolume *
+          (1 - orderComp.investInfo.fSell) -
+        orderComp.investInfo.pBuy *
+          cryptVolume *
+          (1 + orderComp.investInfo.fBuy)
     }
   };
 }

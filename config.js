@@ -6,7 +6,7 @@
 // -----> the fees in the fees file
 
 // Crypto being evaluated / traded on
-let pairs = ["ETH/USD", "ETH/EUR", "BTC/EUR", "BTC/USD", "LTC/EUR", "LTC/USD"];
+let pairs = ["ETH/EUR", "BTC/EUR", "LTC/EUR", "XRP/EUR"];
 
 // Exchanges lets you get the infos from the APIs and save them.
 let exchanges = [
@@ -21,10 +21,10 @@ let exchanges = [
 ];
 
 // authExchangesForInvest will check for investment opportunities.
-let authExchangesForInvest = ["bitbay", "dsx", "kraken", "bitstamp"];
+let authExchangesForInvest = ["bitbay", "dsx", "bitstamp"];
 
 // Investment Consideration variables:
-var maxTimeOut = 10000;
+var maxTimeOut = 3000;
 var minProfit = 0; // NOTE: <======== ADD % SUPPORT /!\/!\
 
 module.exports = {

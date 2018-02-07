@@ -24,7 +24,12 @@ function getOrder(p) {
             })
             .catch(err => {});
           // NOTE: Checking if order exists and is correctly returned (object)
-          if (order && _.isObject(order)) {
+          if (
+            order &&
+            _.isObject(order) &&
+            !_.isEmpty(order.bids) &&
+            !_.isEmpty(order.asks)
+          ) {
             // NOTE: Checking the available balances for the corresponding market
             let balance = await exchange
               .fetchBalance()
@@ -84,60 +89,60 @@ function getOrder(p) {
 // Some other info is added afterwards to the object in the invest function.
 
 function transformOrder(base, comp) {
-  if (
-    base.bids[0][0] &&
-    base.bids[0] &&
-    comp.bids[0][0] &&
-    base.bids[0] &&
-    base.asks[0][0] &&
-    base.asks[0] &&
-    comp.asks[0][0] &&
-    comp.asks[0]
-  ) {
-    let orderComp = {
-      mkBase: base.mkt,
-      mkComp: comp.mkt,
-      pairBase: base.pair,
-      pairComp: comp.pair,
-      oriPriceInfo: {
-        pBidBase: base.bids[0][0],
-        pBidComp: comp.bids[0][0],
-        vBidBase: base.bids[0][1],
-        vBidComp: comp.bids[0][1],
-        pAskBase: base.asks[0][0],
-        pAskComp: comp.asks[0][0],
-        vAskBase: base.asks[0][1],
-        vAskComp: comp.asks[0][1]
-      },
-      processedPriceInfo: {
-        basePriceSpread: comp.bids[0][0] - base.asks[0][0],
-        compPriceSpread: base.bids[0][0] - comp.asks[0][0],
-        baseVolSpread: base.asks[0][1] - comp.bids[0][1],
-        compVolSpread: comp.asks[0][1] - base.bids[0][1]
-      },
-      investInfo: {},
-      oriBalanceInfo: {
-        baseBalance: base.mktvar.balance,
-        compBalance: comp.mktvar.balance
-      },
-      oriFeesInfo: {
-        baseFees: base.mktvar.fees,
-        compFees: comp.mktvar.fees,
-        baseFeesHard: fees[base.mkt],
-        compFeesHard: fees[comp.mkt]
-      },
-      oriTimeInfo: {
-        pingBase: base.ping,
-        pingComp: comp.ping,
-        snBase: base.timestamp,
-        snComp: comp.timestamp
-      },
-      processedTimeInfo: {
-        pingSpread: base.ping - comp.ping,
-        snSpread: base.timestamp - comp.timestamp
-      }
-    };
-    return orderComp;
+  if (base.bids[0] && base.bids[0] && base.asks[0] && comp.asks[0]) {
+    if (
+      base.bids[0][0] &&
+      comp.bids[0][0] &&
+      base.asks[0][0] &&
+      comp.asks[0][0]
+    ) {
+      let orderComp = {
+        mkBase: base.mkt,
+        mkComp: comp.mkt,
+        pairBase: base.pair,
+        pairComp: comp.pair,
+        oriPriceInfo: {
+          pBidBase: base.bids[0][0],
+          pBidComp: comp.bids[0][0],
+          vBidBase: base.bids[0][1],
+          vBidComp: comp.bids[0][1],
+          pAskBase: base.asks[0][0],
+          pAskComp: comp.asks[0][0],
+          vAskBase: base.asks[0][1],
+          vAskComp: comp.asks[0][1]
+        },
+        processedPriceInfo: {
+          basePriceSpread: comp.bids[0][0] - base.asks[0][0],
+          compPriceSpread: base.bids[0][0] - comp.asks[0][0],
+          baseVolSpread: base.asks[0][1] - comp.bids[0][1],
+          compVolSpread: comp.asks[0][1] - base.bids[0][1]
+        },
+        investInfo: {},
+        oriBalanceInfo: {
+          baseBalance: base.mktvar.balance,
+          compBalance: comp.mktvar.balance
+        },
+        oriFeesInfo: {
+          baseFees: base.mktvar.fees,
+          compFees: comp.mktvar.fees,
+          baseFeesHard: fees[base.mkt],
+          compFeesHard: fees[comp.mkt]
+        },
+        oriTimeInfo: {
+          pingBase: base.ping,
+          pingComp: comp.ping,
+          snBase: base.timestamp,
+          snComp: comp.timestamp
+        },
+        processedTimeInfo: {
+          pingSpread: base.ping - comp.ping,
+          snSpread: base.timestamp - comp.timestamp
+        }
+      };
+      return orderComp;
+    } else {
+      console.log("ERROR: TransformOrder, something went wrong");
+    }
   } else {
     console.log("ERROR: TransformOrder, something went wrong");
   }
