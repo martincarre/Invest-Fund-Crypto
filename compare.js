@@ -10,6 +10,8 @@ const { doubleCheck } = require("./investBot");
 const { orderPass } = require("./investBot");
 let i = 0;
 
+// setInterval(async function() {
+// console.log("Loop: ", i++);
 Promise.all(pairs.map(getOrder))
   .then(pairArr => {
     pairArr.forEach(async orderArr => {
@@ -79,3 +81,4 @@ Promise.all(pairs.map(getOrder))
   .catch(err => {
     console.log(err);
   });
+// }, 15000);
