@@ -49,53 +49,36 @@ function doubleCheck(digestArr) {
 // PASSING ORDERS OT THE MARKET:
 
 function orderPass(orderArr) {
-  if (!_.isEmpty(orderArr))
+  if (!_.isEmpty(orderArr)) {
     orderArr.forEach(o => {
-      if (o.investInfo.buyMk && o.investInfo.sellMk) {
-        let buyMk = new ccxt[o.investInfo.buyMk]({
-          timeout: 1500,
-          apiKey: keys[o.investInfo.buyMk].api,
-          secret: keys[o.investInfo.buyMk].secret,
-          enableRateLimit: true,
-          nonce() {
-            return this.milliseconds();
-          }
+      var mkBuy = new ccxt[o.investInfo.mkBuy](keys[o.investInfo.mkBuy]);
+      var mkSell = new ccxt[o.investInfo.mkSell](keys[o.investInfo.mkSell]);
+      mkBuy
+        .createLimitBuyOrder(
+          o.pairBase,
+          o.investInfo.orderToPass.cryptVolume,
+          o.investInfo.pBuy
+        )
+        .then(r => {
+          console.log(r);
+        })
+        .catch(e => {
+          console.log(e);
         });
-        let sellMk = new ccxt[o.investInfo.sellMk]({
-          timeout: 1500,
-          apiKey: keys[o.investInfo.sellMk].api,
-          secret: keys[o.investInfo.sellMk].secret,
-          enableRateLimit: true,
-          nonce() {
-            return this.milliseconds();
-          }
+      mkSell
+        .createLimitSellOrder(
+          o.pairBase,
+          o.investInfo.orderToPass.cryptVolume,
+          o.investInfo.pSell
+        )
+        .then(r => {
+          console.log(r);
+        })
+        .catch(e => {
+          console.log(e);
         });
-        buyMk
-          .createLimitBuyOrder(
-            o.pairBase,
-            o.investInfo.finalVol,
-            o.investInfo.pBuy
-          )
-          .then(r => {
-            console.log(r);
-          })
-          .catch(e => {
-            console.log(e);
-          });
-        sellMk
-          .createLimitSellOrder(
-            o.pairBase,
-            o.investInfo.finalVol,
-            o.investInfo.pSell
-          )
-          .then(r => {
-            console.log(r);
-          })
-          .catch(e => {
-            console.log(e);
-          });
-      }
     });
+  }
 }
 
 module.exports = {
