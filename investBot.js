@@ -4,6 +4,7 @@ const _ = require("lodash");
 const ccxt = require("ccxt");
 const { keys } = require("./keys");
 const { orderServer } = require("./orderServer");
+const { fundFee } = require("./config");
 
 // NOTE: OVERRIDING THE NONCE:
 let nonce = 1;
@@ -80,7 +81,7 @@ function orderPass(orderArr) {
         });
       if (_.isObject(sellOrder) && _.isObject(buyOrder)) {
         o.investInfo.orderToPass.real.fundFee =
-          0.25 * o.investInfo.orderToPass.real.exProfit;
+          fundFee * o.investInfo.orderToPass.real.exProfit;
         o.investInfo.orderToPass.real.transaction = true;
         orderServer(null, null, o);
         console.log(buyOrder);

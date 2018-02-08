@@ -38,11 +38,13 @@ setInterval(async function() {
                         orderServer(base, comp, null);
                       } else {
                         console.log(
-                          `${finalOrder.mkBase} / ${finalOrder.mkComp} - ${
+                          `${finalOrder.investInfo.mkBuy} / ${
+                            finalOrder.investInfo.mkSell
+                          } - ${
                             finalOrder.pairBase
                           }: No cash available or no profit`,
                           JSON.stringify(
-                            finalOrder.investInfo.orderToPass.real,
+                            finalOrder.investInfo.orderToPass,
                             null,
                             3
                           )

@@ -25,12 +25,15 @@ let authExchangesForInvest = ["bitbay", "dsx", "bitstamp"];
 
 // Investment Consideration variables:
 var maxTimeOut = 3000;
-var minProfit = 0.05; // NOTE: Min profit expressed in % over buy volume
+var minProfit = 0.02; // NOTE: Min profit expressed in % over buy volume
+var fundFee = 0.25; // NOTE: Fee charged on positive and successful operation by the fund.
 
+// Exports:
 module.exports = {
   pairs,
   exchanges,
   authExchangesForInvest,
   maxTimeOut,
-  minProfit
+  minProfit,
+  fundFee
 };
