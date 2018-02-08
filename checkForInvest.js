@@ -354,7 +354,15 @@ function orderToPass(
           (1 - orderComp.investInfo.fSell) -
         orderComp.investInfo.pBuy *
           cryptVolume *
-          (1 + orderComp.investInfo.fBuy)
+          (1 + orderComp.investInfo.fBuy),
+      PoV:
+        (orderComp.investInfo.pSell *
+          cryptVolume *
+          (1 - orderComp.investInfo.fSell) -
+          orderComp.investInfo.pBuy *
+            cryptVolume *
+            (1 + orderComp.investInfo.fBuy)) /
+        (orderComp.investInfo.pBuy * cryptVolume)
     }
   };
 }

@@ -1,5 +1,6 @@
 var MongoClient = require("mongodb").MongoClient,
   assert = require("assert");
+const _ = require("lodash");
 
 // NOTE: Server initiation:
 function orderServer(base, comp, order) {
@@ -7,14 +8,22 @@ function orderServer(base, comp, order) {
   MongoClient.connect(url, function(err, client) {
     assert.equal(null, err);
     var db = client.db("orderInfo");
-    insertOrder(db, base, comp, function() {});
-    insertOrderComp(db, base.mkt, comp.mkt, base.pair, order, function() {});
+    if (base && comp && _.isNull(order)) {
+      insertOrder(db, base, comp, function() {});
+    } else if ((order && _.isNull(base)) || _.isNull(comp)) {
+      insertOrderComp(db, order.pairBase, order, function() {});
+    } else if (order && comp && base) {
+      insertOrder(db, base, comp, function() {});
+      insertOrderComp(db, order.pairBase, order, function() {});
+    } else {
+      console.log("Error Server: Missing argument");
+    }
     client.close();
   });
 }
 
 // NOTE: DB Insert for the Comparisons
-function insertOrderComp(db, baseMkt, compMkt, pair, order, callback) {
+function insertOrderComp(db, pair, order, callback) {
   let colModel = "comp" + pair.slice(0, 3);
   let collection = db.collection(colModel);
   collection.insert(order, function(err, result) {

@@ -3,6 +3,7 @@ const { balanceCheck } = require("./checkForInvest");
 const _ = require("lodash");
 const ccxt = require("ccxt");
 const { keys } = require("./keys");
+const { orderServer } = require("./orderServer");
 
 // NOTE: OVERRIDING THE NONCE:
 let nonce = 1;
@@ -53,30 +54,38 @@ function orderPass(orderArr) {
     orderArr.forEach(o => {
       var mkBuy = new ccxt[o.investInfo.mkBuy](keys[o.investInfo.mkBuy]);
       var mkSell = new ccxt[o.investInfo.mkSell](keys[o.investInfo.mkSell]);
-      mkBuy
+      var buyOrder = mkBuy
         .createLimitBuyOrder(
           o.pairBase,
           o.investInfo.orderToPass.cryptVolume,
           o.investInfo.pBuy
         )
         .then(r => {
-          console.log(r);
+          return r;
         })
         .catch(e => {
           console.log(e);
         });
-      mkSell
+      var sellOrder = mkSell
         .createLimitSellOrder(
           o.pairBase,
           o.investInfo.orderToPass.cryptVolume,
           o.investInfo.pSell
         )
         .then(r => {
-          console.log(r);
+          return r;
         })
         .catch(e => {
           console.log(e);
         });
+      if (_.isObject(sellOrder) && _.isObject(buyOrder)) {
+        o.investInfo.orderToPass.real.fundFee =
+          0.25 * o.investInfo.orderToPass.real.exProfit;
+        o.investInfo.orderToPass.real.transaction = true;
+        orderServer(null, null, o);
+        console.log(buyOrder);
+        console.log(sellOrder);
+      }
     });
   }
 }
