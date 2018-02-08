@@ -3,4 +3,3 @@
 Special thanks to kroitor & the rest of the contributors for ccxt.
 
 ==> Bitfinex yields an error on balance checking. Not sure why.
-==> Watch the nonce for Exmo among others. Not sure how to handle the nonce yet

@@ -25,7 +25,7 @@ let authExchangesForInvest = ["bitbay", "dsx", "bitstamp"];
 
 // Investment Consideration variables:
 var maxTimeOut = 3000;
-var minProfit = 0.05; // NOTE: <======== ADD % SUPPORT /!\/!\
+var minProfit = 0.05; // NOTE: Min profit expressed in % over buy volume
 
 module.exports = {
   pairs,
