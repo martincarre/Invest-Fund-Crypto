@@ -3,6 +3,7 @@ var ccxt = require("ccxt");
 var { keys } = require("./keys");
 var { fees } = require("./fees");
 const { exchanges } = require("./config");
+const { logRecord } = require("./logs");
 
 // NOTE: OVERRIDING THE NONCE:
 let nonce = 1;
@@ -23,7 +24,7 @@ function getOrder(p) {
               return o;
             })
             .catch(err => {
-              logRecord(err, "getOrder");
+              if (err) logRecord(err, "getOrder");
             });
           // NOTE: Checking if order exists and is correctly returned (object)
           if (
@@ -39,7 +40,7 @@ function getOrder(p) {
                 return b;
               })
               .catch(err => {
-                logRecord(err, "getOrder");
+                if (err) logRecord(err, "getOrder");
               });
             order.mkt = e;
             order.pair = p;

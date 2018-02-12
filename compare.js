@@ -9,6 +9,7 @@ const { authExchangesForInvest } = require("./config");
 const { doubleCheck } = require("./investBot");
 const { orderPass } = require("./investBot");
 const { minProfit } = require("./config");
+const { logRecord } = require("./logs");
 let i = 0;
 
 setInterval(async function() {
@@ -84,7 +85,6 @@ setInterval(async function() {
       console.log("All orderbook and comparison info saved to DB");
     })
     .catch(err => {
-      logRecord(err, "compare");
-      console.log(err);
+      if (err) logRecord(err, "compare");
     });
 }, 15000);

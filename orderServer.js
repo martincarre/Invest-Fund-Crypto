@@ -1,6 +1,7 @@
 var MongoClient = require("mongodb").MongoClient,
   assert = require("assert");
 const _ = require("lodash");
+const { logRecord } = require("./logs");
 
 // NOTE: Server initiation:
 function orderServer(base, comp, order) {

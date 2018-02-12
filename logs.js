@@ -6,7 +6,7 @@ function logRecord(e, ori) {
   var fileName = "./logs/" + date + ori + ".txt";
 
   fs.appendFile(fileName, JSON.stringify(e, null, 2), err => {
-    console.log(err);
+    if (err) console.log(err);
   });
 }
 
