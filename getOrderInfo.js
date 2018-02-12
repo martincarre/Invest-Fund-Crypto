@@ -24,8 +24,10 @@ function getOrder(p) {
               return o;
             })
             .catch(err => {
-              if (err) logRecord(err, "getOrder");
-            });
+              if (!_.isNull(err) || !_.isEmpty(err))
+                logRecord(err, "getOrder_Balance");
+            }); // SOMETHING IS WRONG WITH ERROR LOGGING HERE... NO IDEA WHY.
+          // IT WOULD LOG SOME EMPTY OBJECTS EVEN WITH AN IF STATMENT BEFORE TRYING TO AVOID IT.
           // NOTE: Checking if order exists and is correctly returned (object)
           if (
             order &&
@@ -40,8 +42,10 @@ function getOrder(p) {
                 return b;
               })
               .catch(err => {
-                if (err) logRecord(err, "getOrder");
-              });
+                if (!_.isNull(err) || !_.isEmpty(err))
+                  logRecord(err, "getOrder_Balance");
+              }); // SOMETHING IS WRONG WITH ERROR LOGGING HERE... NO IDEA WHY.
+            // IT WOULD LOG SOME EMPTY OBJECTS EVEN WITH AN IF STATMENT BEFORE TRYING TO AVOID IT.
             order.mkt = e;
             order.pair = p;
             order.ping = order.timestamp - now;

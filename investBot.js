@@ -63,10 +63,11 @@ function orderPass(orderArr) {
           o.investInfo.pBuy
         )
         .then(r => {
+          logRecord(r, "orderPass_Success_Buy");
           return r;
         })
         .catch(e => {
-          logRecord(e, "orderPass");
+          logRecord(e, "orderPass_Buy");
           console.log(e);
         });
       var sellOrder = mkSell
@@ -76,10 +77,11 @@ function orderPass(orderArr) {
           o.investInfo.pSell
         )
         .then(r => {
+          logRecord(r, "orderPass_Success_Sell");
           return r;
         })
         .catch(e => {
-          logRecord(e, "orderPass");
+          logRecord(e, "orderPass_Sell");
           console.log(e);
         });
       if (_.isObject(sellOrder) && _.isObject(buyOrder)) {
