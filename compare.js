@@ -84,6 +84,7 @@ setInterval(async function() {
       console.log("All orderbook and comparison info saved to DB");
     })
     .catch(err => {
+      logRecord(err, "compare");
       console.log(err);
     });
 }, 15000);

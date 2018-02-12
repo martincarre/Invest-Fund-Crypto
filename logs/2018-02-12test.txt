@@ -1,0 +1,19 @@
+[object Object][object Object]{
+  "err": true,
+  "msg": "This is a test"
+}{
+  "err": true,
+  "msg": "This is a test"
+}{
+  "err": true,
+  "msg": "This is a test"
+}{
+  "err": true,
+  "msg": "This is a test"
+}{
+  "err": true,
+  "msg": "This is a test"
+}{
+  "err": true,
+  "msg": "This is a test"
+}

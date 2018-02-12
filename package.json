@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "ccxt": "^1.10.922",
+    "fs": "0.0.1-security",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.33",
     "mongoose": "^5.0.2",

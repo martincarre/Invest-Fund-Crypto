@@ -5,6 +5,7 @@ const ccxt = require("ccxt");
 const { keys } = require("./keys");
 const { orderServer } = require("./orderServer");
 const { fundFee } = require("./config");
+const { logRecord } = require("./logs");
 
 // NOTE: OVERRIDING THE NONCE:
 let nonce = 1;
@@ -65,6 +66,7 @@ function orderPass(orderArr) {
           return r;
         })
         .catch(e => {
+          logRecord(e, "orderPass");
           console.log(e);
         });
       var sellOrder = mkSell
@@ -77,6 +79,7 @@ function orderPass(orderArr) {
           return r;
         })
         .catch(e => {
+          logRecord(e, "orderPass");
           console.log(e);
         });
       if (_.isObject(sellOrder) && _.isObject(buyOrder)) {

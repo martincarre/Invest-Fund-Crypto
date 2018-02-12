@@ -22,7 +22,9 @@ function getOrder(p) {
             .then(o => {
               return o;
             })
-            .catch(err => {});
+            .catch(err => {
+              logRecord(err, "getOrder");
+            });
           // NOTE: Checking if order exists and is correctly returned (object)
           if (
             order &&
@@ -36,7 +38,9 @@ function getOrder(p) {
               .then(b => {
                 return b;
               })
-              .catch(err => {});
+              .catch(err => {
+                logRecord(err, "getOrder");
+              });
             order.mkt = e;
             order.pair = p;
             order.ping = order.timestamp - now;

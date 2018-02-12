@@ -21,3 +21,7 @@ function formatDate(date) {
 
   return [year, month, day].join("-");
 }
+
+module.exports = {
+  logRecord
+};

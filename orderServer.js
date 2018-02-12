@@ -16,6 +16,7 @@ function orderServer(base, comp, order) {
       insertOrder(db, base, comp, function() {});
       insertOrderComp(db, order.pairBase, order, function() {});
     } else {
+      logRecord("Error Server: Missing argument", "orderServer");
       console.log("Error Server: Missing argument");
     }
     client.close();
